@@ -3,10 +3,7 @@
 -- ==========================================================
 
 -- 1️⃣ DATABASE CREATION
-<<<<<<< HEAD
 DROP DATABASE IF EXISTS PeerTutoring;
-=======
->>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
 CREATE DATABASE IF NOT EXISTS PeerTutoring;
 USE PeerTutoring;
 
@@ -250,11 +247,7 @@ END;
 DELIMITER ;
 
 -- ==========================================================
-<<<<<<< HEAD
 -- 1️⃣1️⃣ PRIVILEGES 
-=======
--- 1️⃣1️⃣ PRIVILEGES (LOGICAL, NOT MYSQL USERS)
->>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
 -- ==========================================================
 
 -- Admin: Full control (view/add/delete)
@@ -273,7 +266,6 @@ SELECT MentorSessionCount(2) AS MentorCompletedSessions;
 -- ✅ VERIFY ADMIN LOGIN ACCOUNT
 -- ==========================================================
 SELECT name, email, password, role FROM Student WHERE role='admin';
-<<<<<<< HEAD
 
 -- ==========================================================
 -- 1️⃣2️⃣ VIEW — INACTIVE MENTEES (NESTED QUERY)
@@ -327,5 +319,3 @@ JOIN Subject sub ON ms.subject_id = sub.subject_id
 JOIN SessionParticipant sp ON ms.session_id = sp.session_id
 JOIN Student stu ON sp.student_id = stu.student_id
 WHERE sp.role = 'mentor';
-=======
->>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
