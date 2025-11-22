@@ -1,65 +1,63 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
+import customtkinter as ctk
+from tkinter import messagebox
 import db_manager
-from pages.admin_page import AdminDashboard  # ✅ Admin dashboard page
+from pages.admin_page import AdminDashboard
 
-
-class AdminAuth(ttk.Frame):
+class AdminAuth(ctk.CTkFrame):
     def __init__(self, parent, go_back_callback, controller=None):
-        super().__init__(parent)
+        super().__init__(parent, fg_color="transparent") # Transparent background
         self.parent = parent
-        self.controller = controller  # reference to main App
+        self.controller = controller
         self.go_back_callback = go_back_callback
         self.pack(fill="both", expand=True)
         self.create_login_page()
 
-    # ----------------------------------------------------------
-    # LOGIN PAGE
-    # ----------------------------------------------------------
     def create_login_page(self):
-        """Creates the Admin login screen."""
         for widget in self.winfo_children():
             widget.destroy()
 
-        ttk.Label(
-            self,
-            text="👑 Admin Login",
-            font=("Helvetica", 22, "bold")
-        ).pack(pady=25)
+        # --- CENTERED CARD FRAME ---
+        # This frame holds the actual login form
+        card = ctk.CTkFrame(self, width=400, corner_radius=20)
+        card.place(relx=0.5, rely=0.5, anchor="center")
 
-        ttk.Label(self, text="Email:").pack(pady=5)
-        self.email_var = tk.StringVar()
-        ttk.Entry(self, textvariable=self.email_var, width=40).pack(pady=5)
+        # Title
+        ctk.CTkLabel(card, text="👑 Admin Portal", font=("Roboto Medium", 24)).pack(pady=(40, 20))
 
-        ttk.Label(self, text="Password:").pack(pady=5)
-        self.password_var = tk.StringVar()
-        ttk.Entry(self, textvariable=self.password_var, show="*", width=40).pack(pady=5)
+        # Email Entry
+        self.email_entry = ctk.CTkEntry(card, placeholder_text="Email Address", width=300, height=40)
+        self.email_entry.pack(pady=10)
 
-        ttk.Button(
-            self, text="Login", command=self.handle_login, width=20
-        ).pack(pady=15)
+        # Password Entry
+        self.pw_entry = ctk.CTkEntry(card, placeholder_text="Password", show="*", width=300, height=40)
+        self.pw_entry.pack(pady=10)
 
-        # ✅ Back button to go to main menu
-        ttk.Button(
-            self, text="⬅ Back", command=self.go_back_callback, width=20
-        ).pack(pady=10)
+        # Login Button
+        ctk.CTkButton(
+            card, text="Login", command=self.handle_login, width=300, height=40,
+            font=("Roboto", 14, "bold"), fg_color="#1F6AA5", hover_color="#144870"
+        ).pack(pady=(20, 10))
 
-    # ----------------------------------------------------------
-    # LOGIN HANDLER
-    # ----------------------------------------------------------
+        # Back Button (Outlined style)
+        ctk.CTkButton(
+            card, text="Back to Menu", command=self.go_back_callback, width=300, height=40,
+            fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE")
+        ).pack(pady=(0, 40))
+
     def handle_login(self):
-        """Handles admin login validation."""
-        email = self.email_var.get().strip()
-        password = self.password_var.get().strip()
+        email = self.email_entry.get().strip()
+        password = self.pw_entry.get().strip()
 
         if not email or not password:
-            messagebox.showwarning("Missing Info", "Please enter both email and password.")
+            messagebox.showwarning("Input Error", "Please fill in all fields.")
             return
 
         user = db_manager.login_user(email, password, "admin")
         if user:
+            # Clean up auth frame
             for widget in self.parent.winfo_children():
                 widget.destroy()
+            # Launch Dashboard
             AdminDashboard(self.parent, user, self.controller)
         else:
-            messagebox.showerror("Login Failed", "Invalid email or password.")
+            messagebox.showerror("Login Failed", "Invalid credentials.")
