@@ -1,132 +1,117 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
+import customtkinter as ctk
+from tkinter import messagebox
 import db_manager
+# Ensure this import matches your file structure
 from pages.mentee_page import MenteeDashboard
 
-
-class MenteeAuth(ttk.Frame):
+class MenteeAuth(ctk.CTkFrame):
     def __init__(self, parent, go_back_callback, controller=None):
-        super().__init__(parent)
+        super().__init__(parent, fg_color="transparent")
         self.parent = parent
-        self.controller = controller   # ✅ Reference to main App (for going back)
+        self.controller = controller
         self.go_back_callback = go_back_callback
         self.pack(fill="both", expand=True)
         self.create_login_page()
 
     # ----------------------------------------------------------
-    # LOGIN PAGE
+    # LOGIN CARD
     # ----------------------------------------------------------
     def create_login_page(self):
-        """Creates the mentee login screen."""
         for widget in self.winfo_children():
             widget.destroy()
 
-        ttk.Label(
-            self, text="🎓 Mentee Login", font=("Helvetica", 22, "bold")
-        ).pack(pady=25)
+        card = ctk.CTkFrame(self, width=400, corner_radius=20)
+        card.place(relx=0.5, rely=0.5, anchor="center")
 
-        ttk.Label(self, text="Email:").pack(pady=5)
-        self.email_var = tk.StringVar()
-        ttk.Entry(self, textvariable=self.email_var, width=40).pack(pady=5)
+        ctk.CTkLabel(card, text="🎓 Mentee Login", font=("Roboto Medium", 24)).pack(pady=(40, 20))
 
-        ttk.Label(self, text="Password:").pack(pady=5)
-        self.password_var = tk.StringVar()
-        ttk.Entry(self, textvariable=self.password_var, show="*", width=40).pack(pady=5)
+        self.email_entry = ctk.CTkEntry(card, placeholder_text="Email", width=300, height=40)
+        self.email_entry.pack(pady=10)
 
-        ttk.Button(
-            self, text="Login", command=self.handle_login, width=20
-        ).pack(pady=15)
+        self.pw_entry = ctk.CTkEntry(card, placeholder_text="Password", show="*", width=300, height=40)
+        self.pw_entry.pack(pady=10)
 
-        ttk.Button(
-            self, text="Register as Mentee", command=self.show_register_page, width=20
+        # Primary Action (Orange/Yellow Theme)
+        ctk.CTkButton(
+            card, text="Login", command=self.handle_login, width=300, height=40,
+            fg_color="#EDB72B", hover_color="#D4A017", text_color="black", font=("Roboto", 14, "bold")
+        ).pack(pady=20)
+
+        ctk.CTkButton(
+            card, text="Create Account", command=self.show_register_page, 
+            fg_color="transparent", text_color=("#333", "#BBB"), hover=False
         ).pack(pady=5)
 
-        ttk.Button(
-            self, text="⬅ Back", command=self.go_back_callback, width=20
-        ).pack(pady=10)
+        ctk.CTkButton(
+            card, text="Back", command=self.go_back_callback, width=100, 
+            fg_color="transparent", border_width=1
+        ).pack(pady=(10, 30))
 
     # ----------------------------------------------------------
-    # REGISTRATION PAGE
+    # REGISTER CARD
     # ----------------------------------------------------------
     def show_register_page(self):
-        """Creates the registration screen for new mentees."""
         for widget in self.winfo_children():
             widget.destroy()
 
-        ttk.Label(
-            self, text="📝 Mentee Registration", font=("Helvetica", 22, "bold")
-        ).pack(pady=25)
+        card = ctk.CTkFrame(self, width=450, corner_radius=20)
+        card.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Field setup
-        fields = [
-            ("Full Name", "name"),
-            ("Email", "email"),
-            ("Password", "password"),
-            ("Phone", "ph_no"),
-            ("Department", "dept"),
-            ("Year (1-4)", "year")
-        ]
+        ctk.CTkLabel(card, text="Student Registration", font=("Roboto Medium", 20)).pack(pady=(30, 15))
 
-        self.reg_vars = {}
+        self.reg_entries = {}
+        fields = [("Full Name", "name"), ("Email", "email"), ("Password", "password"), 
+                  ("Phone", "ph_no"), ("Department", "dept")]
 
         for label, key in fields:
-            ttk.Label(self, text=f"{label}:").pack(pady=4)
-            var = tk.StringVar()
-            entry = ttk.Entry(self, textvariable=var, width=40, show="*" if key == "password" else "")
-            entry.pack(pady=3)
-            self.reg_vars[key] = var
+            entry = ctk.CTkEntry(card, placeholder_text=label, width=350, height=35)
+            if key == "password": entry.configure(show="*")
+            entry.pack(pady=5)
+            self.reg_entries[key] = entry
 
-        ttk.Button(
-            self, text="Register", command=self.register_user, width=20
-        ).pack(pady=15)
+        # Year Dropdown
+        self.year_var = ctk.StringVar(value="Select Year")
+        year_cb = ctk.CTkComboBox(card, values=["1", "2", "3", "4"], variable=self.year_var, width=350, height=35)
+        year_cb.pack(pady=5)
 
-        ttk.Button(
-            self, text="⬅ Back", command=self.create_login_page, width=20
-        ).pack(pady=10)
+        ctk.CTkButton(
+            card, text="Register", command=self.register_user, width=350, height=40,
+            fg_color="#EDB72B", hover_color="#D4A017", text_color="black"
+        ).pack(pady=20)
 
-    # ----------------------------------------------------------
-    # REGISTRATION FUNCTION
-    # ----------------------------------------------------------
+        ctk.CTkButton(
+            card, text="Cancel", command=self.create_login_page, 
+            fg_color="transparent", text_color="gray"
+        ).pack(pady=(0, 30))
+
     def register_user(self):
-        """Handles new mentee registration."""
-        data = {key: var.get().strip() for key, var in self.reg_vars.items()}
+        data = {key: entry.get().strip() for key, entry in self.reg_entries.items()}
+        year_val = self.year_var.get()
 
-        if not all(data.values()):
-            messagebox.showwarning("Input Error", "Please fill all fields before submitting.")
-            return
-
-        try:
-            year = int(data["year"])
-            if year not in [1, 2, 3, 4]:
-                messagebox.showwarning("Input Error", "Year must be between 1 and 4.")
-                return
-        except ValueError:
-            messagebox.showwarning("Input Error", "Year must be a number.")
+        if not all(data.values()) or year_val not in ["1","2","3","4"]:
+            messagebox.showwarning("Input Error", "Fill all fields correctly.")
             return
 
         data["role"] = "mentee"
-
+        try:
+            data["year"] = int(year_val)
+        except ValueError:
+            messagebox.showwarning("Input Error", "Invalid Year")
+            return
+        
         if db_manager.register_user(data):
-            messagebox.showinfo("Success", "Mentee registered successfully!")
+            messagebox.showinfo("Success", "Account created! Please login.")
             self.create_login_page()
 
-    # ----------------------------------------------------------
-    # LOGIN FUNCTION
-    # ----------------------------------------------------------
     def handle_login(self):
-        """Handles mentee login validation."""
-        email = self.email_var.get().strip()
-        password = self.password_var.get().strip()
+        email = self.email_entry.get().strip()
+        pw = self.pw_entry.get().strip()
+        if not email or not pw: return
 
-        if not email or not password:
-            messagebox.showwarning("Missing Info", "Please enter both email and password.")
-            return
-
-        user = db_manager.login_user(email, password, "mentee")
+        user = db_manager.login_user(email, pw, "mentee")
         if user:
-            # ✅ Clear current frame and open Mentee Dashboard
-            for widget in self.parent.winfo_children():
-                widget.destroy()
+            for widget in self.parent.winfo_children(): widget.destroy()
+            # Calls the Dashboard from pages/mentee_page.py
             MenteeDashboard(self.parent, user, self.controller)
         else:
-            messagebox.showerror("Login Failed", "Invalid email or password.")
+            messagebox.showerror("Error", "Invalid credentials.")
