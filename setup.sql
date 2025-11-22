@@ -3,6 +3,10 @@
 -- ==========================================================
 
 -- 1️⃣ DATABASE CREATION
+<<<<<<< HEAD
+DROP DATABASE IF EXISTS PeerTutoring;
+=======
+>>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
 CREATE DATABASE IF NOT EXISTS PeerTutoring;
 USE PeerTutoring;
 
@@ -246,7 +250,11 @@ END;
 DELIMITER ;
 
 -- ==========================================================
+<<<<<<< HEAD
+-- 1️⃣1️⃣ PRIVILEGES 
+=======
 -- 1️⃣1️⃣ PRIVILEGES (LOGICAL, NOT MYSQL USERS)
+>>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
 -- ==========================================================
 
 -- Admin: Full control (view/add/delete)
@@ -265,3 +273,59 @@ SELECT MentorSessionCount(2) AS MentorCompletedSessions;
 -- ✅ VERIFY ADMIN LOGIN ACCOUNT
 -- ==========================================================
 SELECT name, email, password, role FROM Student WHERE role='admin';
+<<<<<<< HEAD
+
+-- ==========================================================
+-- 1️⃣2️⃣ VIEW — INACTIVE MENTEES (NESTED QUERY)
+-- ==========================================================
+CREATE OR REPLACE VIEW InactiveMentees AS
+SELECT student_id, name, email, dept, year
+FROM Student
+WHERE role = 'mentee' 
+AND student_id NOT IN (
+    SELECT DISTINCT student_id 
+    FROM SessionParticipant 
+    WHERE role = 'mentee'
+);
+
+
+-- ==========================================================
+-- 1️⃣3️⃣ FUNCTION — TOTAL SYSTEM SESSIONS (AGGREGATE)
+-- ==========================================================
+-- This satisfies the "Aggregate Query" requirement explicitly in SQL
+DELIMITER //
+CREATE FUNCTION TotalSessionsCount()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE total INT;
+    -- Aggregate Query: COUNT(*)
+    SELECT COUNT(*) INTO total FROM MentorshipSession;
+    RETURN total;
+END;
+//
+DELIMITER ;
+
+-- ==========================================================
+-- 1️⃣4️⃣ VIEW — SESSION MASTER LIST (COMPLEX JOIN)
+-- ==========================================================
+-- This satisfies the "Join Query" requirement explicitly.
+-- It joins 4 tables to show Session Details + Subject Name + Mentor Name.
+
+CREATE OR REPLACE VIEW SessionMasterList AS
+SELECT 
+    ms.session_id,
+    sub.subject_name,
+    ms.date_time,
+    ms.duration,
+    ms.status,
+    stu.name AS mentor_name,
+    stu.email AS mentor_email
+
+FROM MentorshipSession ms
+JOIN Subject sub ON ms.subject_id = sub.subject_id
+JOIN SessionParticipant sp ON ms.session_id = sp.session_id
+JOIN Student stu ON sp.student_id = stu.student_id
+WHERE sp.role = 'mentor';
+=======
+>>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
