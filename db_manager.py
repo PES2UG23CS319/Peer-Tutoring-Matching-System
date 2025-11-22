@@ -11,7 +11,11 @@ def get_db_connection():
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
+<<<<<<< HEAD
+            password="mkd@sql",   # change to your MySQL password
+=======
             password="maitreyi",   # change to your MySQL password
+>>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
             database="PeerTutoring"
         )
         return conn
@@ -163,6 +167,18 @@ def schedule_session(subject_id, date_time, duration, mentor_id, mentee_ids_str)
         conn.close()
 
 
+<<<<<<< HEAD
+def fetch_all_sessions():
+    conn = get_db_connection()
+    if not conn: return []
+
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        # RUBRIC: USING THE JOIN VIEW WE CREATED IN SQL
+        cursor.execute("SELECT * FROM SessionMasterList ORDER BY date_time DESC")
+        
+=======
 # NEW FUNCTION: fetch all sessions
 def fetch_all_sessions():
     conn = get_db_connection()
@@ -176,12 +192,16 @@ def fetch_all_sessions():
             FROM MentorshipSession
             ORDER BY date_time DESC
         """)
+>>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
         return cursor.fetchall()
 
     finally:
         conn.close()
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
 def update_session_status(session_id, status):
     conn = get_db_connection()
     if not conn:
@@ -239,6 +259,127 @@ def fetch_all_feedback():
 
     finally:
         conn.close()
+<<<<<<< HEAD
+        
+# ==========================================================
+# NEW: NESTED QUERY FUNCTION
+# ==========================================================
+def fetch_inactive_mentees():
+    conn = get_db_connection()
+    if not conn: return []
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        # ---------------------------------------------------------
+        # NESTED QUERY EXPLANATION:
+        # The inner query (SELECT DISTINCT student_id ...) gets a list of all active mentees.
+        # The outer query selects students who are NOT IN that list.
+        # ---------------------------------------------------------
+        query = """
+            SELECT student_id, name, email, dept, year
+            FROM Student
+            WHERE role = 'mentee' 
+            AND student_id NOT IN (
+                SELECT DISTINCT student_id 
+                FROM SessionParticipant 
+                WHERE role = 'mentee'
+            )
+        """
+        cursor.execute(query)
+        return cursor.fetchall()
+
+    except Exception as e:
+        messagebox.showerror("Database Error", f"Error fetching inactive users: {e}")
+        return []
+        
+    finally:
+        conn.close()
+        
+# ==========================================================
+# RUBRIC FIXES: SQL FUNCTION & AGGREGATE QUERY
+# ==========================================================
+
+# 1. Calls the SQL Stored Function 'MentorSessionCount'
+def get_mentor_completed_count_via_function(mentor_id):
+    conn = get_db_connection()
+    if not conn: return 0
+    try:
+        cursor = conn.cursor()
+        # Call the SQL Function defined in setup.sql
+        cursor.execute("SELECT MentorSessionCount(%s)", (mentor_id,))
+        result = cursor.fetchone()
+        return result[0] if result else 0
+    except Exception as e:
+        print(f"Error calling SQL Function: {e}")
+        return 0
+    finally:
+        conn.close()
+
+def get_total_sessions_aggregate():
+    conn = get_db_connection()
+    if not conn: return 0
+    try:
+        cursor = conn.cursor()
+        
+        # RUBRIC: CALLING THE AGGREGATE FUNCTION DEFINED IN SQL
+        cursor.execute("SELECT TotalSessionsCount()") 
+        
+        result = cursor.fetchone()
+        return result[0] if result else 0
+    except Exception as e:
+        print(f"Error fetching aggregate: {e}")
+        return 0
+    finally:
+        conn.close()
+        
+# ==========================================================
+# EDIT USER FUNCTIONS
+# ==========================================================
+def get_student_by_id(student_id):
+    conn = get_db_connection()
+    if not conn: return None
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Student WHERE student_id=%s", (student_id,))
+        return cursor.fetchone()
+    finally:
+        conn.close()
+
+def update_student(student_id, name, email, ph_no, dept, year):
+    conn = get_db_connection()
+    if not conn: return False
+    try:
+        cursor = conn.cursor()
+        query = """
+            UPDATE Student 
+            SET name=%s, email=%s, ph_no=%s, dept=%s, year=%s
+            WHERE student_id=%s
+        """
+        cursor.execute(query, (name, email, ph_no, dept, year, student_id))
+        conn.commit()
+        return True
+    except Exception as e:
+        messagebox.showerror("Update Error", f"Could not update user: {e}")
+        return False
+    finally:
+        conn.close()
+        
+# ==========================================================
+# DELETE USER FUNCTION
+# ==========================================================
+def delete_student(student_id):
+    conn = get_db_connection()
+    if not conn: return False
+    try:
+        cursor = conn.cursor()
+        # ON DELETE CASCADE in your SQL will auto-remove their sessions/feedback
+        cursor.execute("DELETE FROM Student WHERE student_id=%s", (student_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        messagebox.showerror("Delete Error", f"Could not delete user: {e}")
+        return False
+=======
 
 def refresh_trigger_statuses():
     """
@@ -264,5 +405,6 @@ def refresh_trigger_statuses():
         print("Trigger refresh error:", e)
         return False
 
+>>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
     finally:
         conn.close()
