@@ -11,11 +11,7 @@ def get_db_connection():
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
-<<<<<<< HEAD
             password="mkd@sql",   # change to your MySQL password
-=======
-            password="maitreyi",   # change to your MySQL password
->>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
             database="PeerTutoring"
         )
         return conn
@@ -167,7 +163,6 @@ def schedule_session(subject_id, date_time, duration, mentor_id, mentee_ids_str)
         conn.close()
 
 
-<<<<<<< HEAD
 def fetch_all_sessions():
     conn = get_db_connection()
     if not conn: return []
@@ -178,30 +173,11 @@ def fetch_all_sessions():
         # RUBRIC: USING THE JOIN VIEW WE CREATED IN SQL
         cursor.execute("SELECT * FROM SessionMasterList ORDER BY date_time DESC")
         
-=======
-# NEW FUNCTION: fetch all sessions
-def fetch_all_sessions():
-    conn = get_db_connection()
-    if not conn:
-        return []
-
-    try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT session_id, subject_id, date_time, duration, status
-            FROM MentorshipSession
-            ORDER BY date_time DESC
-        """)
->>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
         return cursor.fetchall()
 
     finally:
         conn.close()
 
-<<<<<<< HEAD
-=======
-
->>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
 def update_session_status(session_id, status):
     conn = get_db_connection()
     if not conn:
@@ -259,7 +235,6 @@ def fetch_all_feedback():
 
     finally:
         conn.close()
-<<<<<<< HEAD
         
 # ==========================================================
 # NEW: NESTED QUERY FUNCTION
@@ -379,32 +354,5 @@ def delete_student(student_id):
     except Exception as e:
         messagebox.showerror("Delete Error", f"Could not delete user: {e}")
         return False
-=======
-
-def refresh_trigger_statuses():
-    """
-    Forces the trigger to run by re-updating scheduled sessions.
-    Any scheduled session with date_time < NOW() will auto-update
-    to completed because of the trigger.
-    """
-    conn = get_db_connection()
-    if not conn:
-        return False
-
-    try:
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE MentorshipSession
-            SET status = status
-            WHERE status='scheduled'
-        """)
-        conn.commit()
-        return True
-
-    except Exception as e:
-        print("Trigger refresh error:", e)
-        return False
-
->>>>>>> a7666d96e8533c1aeb34802e5ebeeae6ea1660f3
     finally:
         conn.close()
